@@ -7,7 +7,7 @@
     "build": "vite build",
     "dev": "vite",
     "server": "node server.cjs",
-    "php-server": "php -S localhost:8000"
+    "php-server": "php -S localhost:8000",`n    "auto-sync": "node scripts/auto-sync.js"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -73,6 +73,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
+    "nodemon": "^3.1.14",
     "tailwindcss": "4.1.12",
     "vite": "6.3.5"
   },
@@ -94,3 +95,4 @@
     }
   }
 }
+
