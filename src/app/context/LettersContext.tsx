@@ -1,75 +1,100 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { api } from "../../services/api";
 
 export interface LetterRequest {
-  id: string;
-  userId: string;
-  userName: string;
+  id: number;
+  user_id: number;
+  user_name: string;
   type: string;
   purpose: string;
-  requestDate: string;
-  status: "Menunggu" | "Diproses" | "Selesai";
-  processedData?: {
-    letterNumber: string;
-    content: string;
-    issueDate: string;
-    signer: string;
-  };
+  phone: string;
+  status: 'menunggu' | 'dicek_sekretaris' | 'menunggu_ttd_ketua' | 'selesai' | 'ditolak';
+  status_label: string;
+  status_color: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  letter_number?: string;
+  content?: string;
+  issue_date?: string;
+  sekretaris_signature?: string;
+  sekretaris_stamp?: string;
+  ketua_signature?: string;
+  processed_by_name?: string;
+  approved_by_name?: string;
 }
 
 interface LettersContextType {
   requests: LetterRequest[];
-  addRequest: (request: Omit<LetterRequest, "id" | "status" | "requestDate">) => void;
-  updateStatus: (id: string, status: LetterRequest["status"]) => void;
-  processLetter: (id: string, data: LetterRequest["processedData"]) => void;
-  getRequestsByUser: (userId: string) => LetterRequest[];
-  getRequestById: (id: string) => LetterRequest | undefined;
+  addRequest: (type: string, purpose: string, phone: string, requestedName?: string) => Promise<void>;
+  prosesLetter: (id: number, data: {
+    letterNumber: string; content: string; issueDate: string;
+    sekretarisSignature: string; sekretarisStamp: string;
+  }) => Promise<void>;
+  ttdKetuaLetter: (id: number, ketuaSignature: string) => Promise<void>;
+  tolakLetter: (id: number, reason: string) => Promise<void>;
+  selesaiLetter: (id: number, letterNumber: string) => Promise<void>;
+  getMyLetters: () => Promise<LetterRequest[]>;
+  getLetterById: (id: number) => Promise<LetterRequest>;
+  refreshLetters: (status?: string) => Promise<void>;
 }
 
 const LettersContext = createContext<LettersContextType | undefined>(undefined);
 
 export function LettersProvider({ children }: { children: ReactNode }) {
-  const [requests, setRequests] = useState<LetterRequest[]>(() => {
-    const saved = localStorage.getItem("nu_letter_requests");
-    return saved ? JSON.parse(saved) : [
-      {
-        id: "1",
-        userId: "member-1",
-        userName: "Ahmad Fauzi",
-        type: "Surat Keterangan Aktif",
-        purpose: "Beasiswa Pendidikan",
-        requestDate: new Date().toISOString(),
-        status: "Menunggu"
-      }
-    ];
-  });
+  const [requests, setRequests] = useState<LetterRequest[]>([]);
 
-  useEffect(() => {
-    localStorage.setItem("nu_letter_requests", JSON.stringify(requests));
-  }, [requests]);
+  const refreshLetters = useCallback(async (status?: string) => {
+    try {
+      const data = await api.getLetters(status);
+      setRequests(data as LetterRequest[]);
+    } catch (e) {
+      console.error('Failed to load letters', e);
+    }
+  }, []);
 
-  const addRequest = (data: Omit<LetterRequest, "id" | "status" | "requestDate">) => {
-    const newRequest: LetterRequest = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9),
-      status: "Menunggu",
-      requestDate: new Date().toISOString()
-    };
-    setRequests(prev => [newRequest, ...prev]);
-  };
+  const addRequest = useCallback(async (type: string, purpose: string, phone: string, requestedName?: string) => {
+    await api.submitLetter({ type, purpose, phone, requestedName });
+    await refreshLetters();
+  }, [refreshLetters]);
 
-  const updateStatus = (id: string, status: LetterRequest["status"]) => {
-    setRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
-  };
+  const prosesLetter = useCallback(async (id: number, data: {
+    letterNumber: string; content: string; issueDate: string;
+    sekretarisSignature: string; sekretarisStamp: string;
+  }) => {
+    await api.prosesLetter(id, data);
+    await refreshLetters();
+  }, [refreshLetters]);
 
-  const processLetter = (id: string, data: LetterRequest["processedData"]) => {
-    setRequests(prev => prev.map(req => req.id === id ? { ...req, processedData: data, status: "Selesai" } : req));
-  };
+  const ttdKetuaLetter = useCallback(async (id: number, ketuaSignature: string) => {
+    await api.ttdKetuaLetter(id, { ketuaSignature });
+    await refreshLetters();
+  }, [refreshLetters]);
 
-  const getRequestsByUser = (userId: string) => requests.filter(req => req.userId === userId);
-  const getRequestById = (id: string) => requests.find(req => req.id === id);
+  const tolakLetter = useCallback(async (id: number, reason: string) => {
+    await api.tolakLetter(id, reason);
+    await refreshLetters();
+  }, [refreshLetters]);
+
+  const selesaiLetter = useCallback(async (id: number, letterNumber: string) => {
+    await api.selesaiLetter(id, { letterNumber });
+    await refreshLetters();
+  }, [refreshLetters]);
+
+  const getMyLetters = useCallback(async () => {
+    return api.getMyLetters() as Promise<LetterRequest[]>;
+  }, []);
+
+  const getLetterById = useCallback(async (id: number) => {
+    return api.getLetterById(id) as Promise<LetterRequest>;
+  }, []);
 
   return (
-    <LettersContext.Provider value={{ requests, addRequest, updateStatus, processLetter, getRequestsByUser, getRequestById }}>
+    <LettersContext.Provider value={{
+      requests, addRequest,
+      prosesLetter, ttdKetuaLetter, tolakLetter, selesaiLetter,
+      getMyLetters, getLetterById, refreshLetters,
+    }}>
       {children}
     </LettersContext.Provider>
   );

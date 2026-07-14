@@ -1,13 +1,98 @@
-import { Link } from "react-router";
-import { ArrowRight, Users, Zap, Heart, BookOpen, Award } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { ArrowRight, Users, Zap, Heart, BookOpen, Award, LayoutDashboard, Mail, Shield, Crown, ShieldCheck } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import IPNULogo from "../../assets/images/IPNU.png";
-import IPPNULogo from "../../assets/images/IPPNU.png";
+import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
+
+const IPNULogo = "/images/IPNU.png";
+const IPPNULogo = "/images/IPPNU.png";
+
+function RoleBanner() {
+  const { user, hasRole } = useAuth();
+  if (!user) return null;
+
+  const banners: Record<string, { gradient: string; icon: React.ReactNode; title: string; sub: string; href: string; btnLabel: string }> = {
+    super_admin: {
+      gradient: "from-gray-800 to-gray-900",
+      icon: <Shield className="w-6 h-6 text-amber-400" />,
+      title: "Panel Admin Aktif",
+      sub: "Anda memiliki akses penuh ke seluruh fitur sistem.",
+      href: "/admin",
+      btnLabel: "Buka Dashboard Admin",
+    },
+    ketua: {
+      gradient: "from-amber-600 to-yellow-600",
+      icon: <Crown className="w-6 h-6 text-white" />,
+      title: `Halo, Ketua ${user.name}`,
+      sub: "Cek surat yang menunggu persetujuan Anda.",
+      href: "/dashboard/ketua",
+      btnLabel: "Buka Dashboard Ketua",
+    },
+    sekretaris: {
+      gradient: "from-blue-700 to-indigo-700",
+      icon: <ShieldCheck className="w-6 h-6 text-white" />,
+      title: `Halo, Sekretaris ${user.name}`,
+      sub: "Proses pengajuan surat dari anggota.",
+      href: "/dashboard/sekretaris",
+      btnLabel: "Buka Dashboard Sekretaris",
+    },
+    anggota: {
+      gradient: "from-[#0f5132] to-emerald-600",
+      icon: <LayoutDashboard className="w-6 h-6 text-white" />,
+      title: `Halo, ${user.name}!`,
+      sub: "Akses dashboard Anda untuk mengajukan surat dan melihat riwayat.",
+      href: "/dashboard/anggota",
+      btnLabel: "Dashboard Saya",
+    },
+  };
+
+  const role = user.role || "anggota";
+  const b = banners[role] || banners.anggota;
+
+  return (
+    <div className={`bg-gradient-to-r ${b.gradient} text-white rounded-[2rem] p-5 sm:p-6 mx-4 sm:mx-6 lg:mx-8 mb-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4`}>
+      <div className="flex items-center gap-4">
+        <div className="p-3 bg-white/15 backdrop-blur-sm rounded-2xl shrink-0">{b.icon}</div>
+        <div>
+          <h3 className="font-black text-lg">{b.title}</h3>
+          <p className="text-sm opacity-80 font-medium">{b.sub}</p>
+        </div>
+      </div>
+      <Link to={b.href}>
+        <Button className="bg-white/20 hover:bg-white/30 text-white font-bold px-5 h-10 rounded-xl border border-white/20 backdrop-blur-sm gap-2 whitespace-nowrap">
+          {b.btnLabel} <ArrowRight className="w-4 h-4" />
+        </Button>
+      </Link>
+    </div>
+  );
+}
 
 export function Home() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      const getDashboardPath = (role?: string) => {
+        switch (role) {
+          case 'super_admin': return '/admin';
+          case 'ketua': return '/dashboard/ketua';
+          case 'sekretaris': return '/dashboard/sekretaris';
+          case 'anggota': return '/dashboard/anggota';
+          default: return '/';
+        }
+      };
+      const path = getDashboardPath(user.role);
+      if (path !== '/') {
+        navigate(path, { replace: true });
+      }
+    }
+  }, [user, navigate]);
+
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
+
       {/* Watermark Background */}
       <div
         className="fixed inset-0 opacity-3 pointer-events-none z-0"

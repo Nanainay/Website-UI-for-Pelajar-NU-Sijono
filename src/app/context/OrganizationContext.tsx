@@ -7,6 +7,7 @@ export interface Manager {
   period: string;
   photo?: string;
   type: "IPNU" | "IPPNU";
+  nia?: string;
 }
 
 export interface Member {
@@ -22,6 +23,7 @@ export interface Member {
   gender?: string;
   education?: string;
   organization?: string;
+  nia?: string;
 }
 
 interface OrganizationContextType {
@@ -37,7 +39,7 @@ interface OrganizationContextType {
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
-const DATA_VERSION = "v2";
+const DATA_VERSION = "v4";
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [managers, setManagers] = useState<Manager[]>(() => {
@@ -50,18 +52,18 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     }
     const saved = localStorage.getItem("nu_managers");
     return saved ? JSON.parse(saved) : [
-      { id: "1", name: "Muhammad Wildan", position: "Ketua", period: "2024-2026", type: "IPNU", photo: "" },
-      { id: "2", name: "Ahmad Fauzi", position: "Sekretaris", period: "2024-2026", type: "IPNU", photo: "" },
-      { id: "3", name: "Siti Aminah", position: "Ketua", period: "2024-2026", type: "IPPNU", photo: "" },
-      { id: "4", name: "Lailatul Fitri", position: "Sekretaris", period: "2024-2026", type: "IPPNU", photo: "" },
+      { id: "1", name: "Muhammad Wildan", position: "Ketua", period: "2024-2026", type: "IPNU", photo: "", nia: "11111" },
+      { id: "2", name: "Ahmad Fauzi", position: "Sekretaris", period: "2024-2026", type: "IPNU", photo: "", nia: "22222" },
+      { id: "3", name: "Siti Aminah", position: "Ketua", period: "2024-2026", type: "IPPNU", photo: "", nia: "33333" },
+      { id: "4", name: "Lailatul Fitri", position: "Sekretaris", period: "2024-2026", type: "IPPNU", photo: "", nia: "44444" },
     ];
   });
 
   const [members, setMembers] = useState<Member[]>(() => {
     const saved = localStorage.getItem("nu_members");
     return saved ? JSON.parse(saved) : [
-      { id: "m1", name: "Budi Santoso", address: "Sijono RT 01/02", phone: "08123456789", joinDate: "2024-01-10", status: "Aktif" },
-      { id: "m2", name: "Rina Wijaya", address: "Sijono RT 03/01", phone: "08987654321", joinDate: "2024-02-15", status: "Aktif" },
+      { id: "m1", name: "Budi Santoso", address: "Sijono RT 01/02", phone: "08123456789", joinDate: "2024-01-10", status: "Aktif", nia: "12345" },
+      { id: "m2", name: "Rina Wijaya", address: "Sijono RT 03/01", phone: "08987654321", joinDate: "2024-02-15", status: "Aktif", nia: "67890" },
     ];
   });
 

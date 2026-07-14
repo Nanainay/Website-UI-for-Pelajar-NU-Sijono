@@ -50,10 +50,10 @@ export function MemberRegistration() {
 
   const contactPersons = [
     {
-      name: "Ahmad Rizki",
+      name: "Moh. Alwi Andiansyah S.",
       position: "Ketua IPNU",
       organization: "IPNU",
-      phone: "+62 812-3456-7890",
+      phone: "+62 812-2998-5524",
       bgColor: "bg-gradient-to-br from-green-100 to-green-200",
       borderColor: "border-green-200",
       textColor: "text-green-800",
@@ -61,10 +61,10 @@ export function MemberRegistration() {
       phoneColor: "text-green-700",
     },
     {
-      name: "Siti Nurhaliza",
+      name: "Fina Inayatul Maula",
       position: "Ketua IPPNU",
       organization: "IPPNU",
-      phone: "+62 813-4567-8901",
+      phone: "+62 852-2506-1238",
       bgColor: "bg-gradient-to-br from-amber-100 to-amber-200",
       borderColor: "border-amber-200",
       textColor: "text-amber-800",
