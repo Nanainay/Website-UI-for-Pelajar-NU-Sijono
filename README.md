@@ -128,4 +128,7 @@ Jika Anda mengeksekusi `seed_users.sql`, berikut adalah daftar kredensial yang d
 Sistem ini terus dikembangkan untuk memajukan administrasi digital Pimpinan Ranting IPNU-IPPNU Desa Sijono. Apabila ditemukan permasalahan dalam sistem (*bug*), silakan buat **Issue** baru pada repositori ini.
 
 **© 2026 IPNU IPPNU Desa Sijono. All rights reserved.**
-Dibuat dengan ❤️ untuk kemajuan Pelajar NU.
+Dibuat oleh:
+FINA INAYATUL MAULA
+101230036
+TF23B
